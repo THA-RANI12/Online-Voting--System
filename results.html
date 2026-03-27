@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Voting Platform — Live Results</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .result-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .result-avatar {
+            font-size: 32px;
+            margin-right: 16px;
+            background: rgba(255,255,255,0.8);
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .result-info {
+            flex: 1;
+        }
+        .result-name {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .result-bar-bg {
+            background: rgba(0,0,0,0.05);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .result-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), #00bcd4);
+            transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 0%;
+        }
+        .winner .result-bar-fill {
+            background: linear-gradient(90deg, #ffeb3b, #fbc02d);
+            box-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+        }
+        .crown {
+            position: absolute;
+            top: -15px;
+            right: -10px;
+            font-size: 24px;
+            transform: rotate(15deg);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            display: none;
+        }
+        .winner .crown {
+            display: block;
+        }
+        .live-pulse {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--error);
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 82, 82, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display:flex; justify-content:space-between; align-items:center; max-width:800px; margin:0 auto; width:100%;">
+            <h1>💎 VotePro</h1>
+            <div style="font-weight:600; font-size:14px; color:var(--error); display:flex; align-items:center;">
+                <span class="live-pulse"></span> LIVE
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="card wide stagger">
+            <h2>Public Election Results</h2>
+            <p style="text-align:center; color:var(--text-dim); margin-bottom:32px;">Real-time vote counting and analytics tracking.</p>
+
+            <div id="resultsContainer">
+                <div style="text-align:center; padding: 40px; color: var(--text-dim);">Loading results...</div>
+            </div>
+
+            <div style="text-align:center; margin-top:24px; border-top:1px solid var(--border); padding-top:24px;">
+                <a href="index.html" class="btn" style="max-width:300px;">← Back to Home / Login</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 VotePro Platform &nbsp;·&nbsp; Live Data
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderResults();
+            setInterval(renderResults, 5000); // Polling for SaaS live feel
+        });
+
+        function renderResults() {
+            const container = document.getElementById('resultsContainer');
+            const candidates = getCandidates();
+            
+            if(candidates.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-dim);">No candidates registered yet.</div>';
+                return;
+            }
+
+            const totalVotes = candidates.reduce((sum, c) => sum + parseInt(c.votes), 0);
+            
+            // Sort by votes
+            const sorted = [...candidates].sort((a,b) => b.votes - a.votes);
+            const highestVote = sorted[0].votes;
+
+            if (totalVotes === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-dim);">No votes have been cast yet! 📈 Waiting for the first vote.</div>';
+                return;
+            }
+
+            container.innerHTML = sorted.map((c, i) => {
+                const isWinner = totalVotes > 0 && c.votes === highestVote && c.votes > 0 && i === 0;
+                const percentage = totalVotes === 0 ? 0 : Math.round((c.votes / totalVotes) * 100);
+
+                return `
+                <div class="result-row ${isWinner ? 'winner' : ''}">
+                    <div class="result-avatar">
+                        <span class="crown">👑</span>
+                        ${c.avatar || '👤'}
+                    </div>
+                    <div class="result-info">
+                        <div class="result-name">
+                            <span>${c.name}</span>
+                            <span style="color:var(--primary);">${c.votes} votes (${percentage}%)</span>
+                        </div>
+                        <div class="result-bar-bg">
+                            <div class="result-bar-fill" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

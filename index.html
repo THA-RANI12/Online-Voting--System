@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Voting Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <h1>💎 VotePro</h1>
+        <p>The secure, seamless platform for live digital elections.</p>
+    </header>
+
+    <main class="main-content">
+        <div class="card stagger">
+            <h2>Voter Registration</h2>
+            <p style="text-align:center; color:var(--text-dim); margin-bottom:24px; font-size:14px;">
+                Enter your details to access your secure digital ballot.
+            </p>
+
+            <form id="loginForm" onsubmit="handleRegistration(event)">
+                <div class="input-wrap">
+                    <label for="voterName">Full Name</label>
+                    <input type="text" id="voterName" placeholder="e.g. John Doe" minlength="3" maxlength="30" required autocomplete="name">
+                </div>
+
+                <div class="input-wrap">
+                    <label for="voterPhone">Phone Number</label>
+                    <input type="tel" id="voterPhone" placeholder="10-digit mobile number" pattern="[0-9]{10}" maxlength="10" required autocomplete="tel">
+                </div>
+
+                <div id="authErrMsg" class="msg error"></div>
+
+                <button type="submit" class="btn" id="regBtn">Access Ballot →</button>
+            </form>
+
+            <div style="margin-top: 24px; text-align:center; font-size:12px;">
+                <a href="admin.html" style="color:var(--text-dim); text-decoration:none; opacity:0.8;">Admin Portal</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 VotePro Platform &nbsp;·&nbsp; Secure & Verified
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>

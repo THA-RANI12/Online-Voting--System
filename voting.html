@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Voting Platform — Official Ballot</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <div style="display:flex; justify-content:space-between; align-items:center; max-width:800px; margin:0 auto; width:100%;">
+            <h1>💎 VotePro Ballot</h1>
+            <div id="userInfo" style="background:var(--primary); color:white; padding:6px 16px; border-radius:20px; font-size:14px; font-weight:600; cursor:pointer;" onclick="logout()">
+                Loading..
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="card wide stagger">
+            <h2>Select Your Candidate</h2>
+            
+            <div style="background: rgba(0,188,212,0.1); border-left: 4px solid var(--secondary); padding: 16px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; color: var(--text-dim);">
+                <strong>Voting Instructions:</strong> Select exactly <strong>one (1) candidate</strong> from the list below. Your vote is confidential, binding, and cannot be changed after submission.
+            </div>
+
+            <div id="errMsg" class="msg"></div>
+            <div id="successMsg" class="msg" style="background: rgba(76,175,80,0.1); color: var(--success); border: 1px solid rgba(76,175,80,0.2);"></div>
+
+            <div class="candidates-grid" id="candidatesGrid">
+                <!-- Injected by vote.js -->
+            </div>
+
+            <div style="text-align: right; border-top: 1px solid var(--border); padding-top: 20px;">
+                <button type="button" class="btn" id="submitBtn" disabled style="width: auto; min-width: 200px;">
+                    Cast Official Vote →
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 VotePro Platform &nbsp;·&nbsp; Secure & Verified
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/vote.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>

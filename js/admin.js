@@ -102,6 +102,13 @@ function logoutAdmin() {
     window.location.reload();
 }
 
+function resetAdminPasscode() {
+    if (!confirm("This will erase the saved admin passcode. You will be prompted to create a new one on next login. Continue?")) return;
+    localStorage.removeItem('saas_v1_admin_pass');   // clear the stored passcode
+    sessionStorage.removeItem('saasAdminAuth');
+    window.location.reload();
+}
+
 function switchTab(id, btn) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.getElementById(id).classList.add('active');

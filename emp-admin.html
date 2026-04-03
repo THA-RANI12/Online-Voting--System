@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management — Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* ── Layout ─────────────────────────────────────────── */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            padding: 32px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-brand {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .sidebar-brand .brand-icon {
+            font-size: 42px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .sidebar-brand h2 {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+        }
+        .sidebar-brand p {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        .nav-btn:hover  { background: rgba(155,81,224,0.08); color: var(--primary); }
+        .nav-btn.active { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(155,81,224,0.3); }
+
+        .admin-main   { flex: 1; padding: 40px; overflow-y: auto; }
+
+        /* ── Login Overlay ───────────────────────────────────── */
+        #empLoginOverlay {
+            position: fixed; inset: 0;
+            background: var(--bg-gradient);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000;
+        }
+
+        /* ── Tabs ────────────────────────────────────────────── */
+        .emp-tab           { display: none; }
+        .emp-tab.active    { display: block; animation: slideUp 0.4s ease forwards; }
+
+        /* ── Stat Cards ──────────────────────────────────────── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-icon  { font-size: 32px; margin-bottom: 10px; }
+        .stat-val   { font-size: 38px; font-weight: 900; color: var(--primary); line-height: 1; }
+        .stat-label { font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; }
+
+        /* ── Employee Form ───────────────────────────────────── */
+        .emp-form-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            margin-bottom: 28px;
+        }
+        .emp-form-card h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr auto;
+            gap: 14px;
+            align-items: end;
+        }
+        @media (max-width: 700px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+
+        /* ── ID Format Hint ──────────────────────────────────── */
+        .id-format-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(155,81,224,0.07);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .id-format-hint .hint-label { color: var(--text-dim); font-weight: 400; }
+
+        /* ── Search Bar ──────────────────────────────────────── */
+        .search-wrap {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .search-wrap input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 2px solid rgba(155,81,224,0.15);
+            background: #fff;
+            font-size: 14px;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+        .search-wrap input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(155,81,224,0.08);
+        }
+        .search-wrap button {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(155,81,224,0.1);
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .search-wrap button:hover { background: rgba(155,81,224,0.2); }
+
+        /* ── Employee Table ──────────────────────────────────── */
+        .emp-table-wrap {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .emp-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .emp-table th {
+            background: rgba(155,81,224,0.06);
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid rgba(155,81,224,0.08);
+        }
+        .emp-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        .emp-table tr:last-child td { border-bottom: none; }
+        .emp-table tr:hover td    { background: rgba(155,81,224,0.03); }
+
+        .emp-id-badge {
+            display: inline-block;
+            background: rgba(155,81,224,0.1);
+            color: var(--primary);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Table Buttons ───────────────────────────────────── */
+        .tbl-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 4px;
+            transition: opacity 0.2s;
+        }
+        .tbl-btn:hover { opacity: 0.8; }
+        .edit-btn { background: rgba(0,188,212,0.12); color: #00838f; }
+        .del-btn  { background: rgba(255,82,82,0.1);  color: var(--error); }
+
+        .emp-empty-notice {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+            font-size: 15px;
+            display: none;
+        }
+
+        /* ── Settings Cards ──────────────────────────────────── */
+        .settings-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+        .settings-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .settings-card p {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .inline-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .inline-row .input-wrap { margin-bottom: 0; flex: 1; min-width: 120px; }
+        .danger-card {
+            border: 1px solid rgba(255,82,82,0.25);
+            background: rgba(255,82,82,0.04) !important;
+        }
+        .danger-card h3 { color: var(--error); }
+
+        .format-preview-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(155,81,224,0.06);
+            border: 1px solid var(--primary-light);
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+        }
+        .format-preview-box .preview-label { font-size: 13px; color: var(--text-dim); }
+        .format-preview-box .preview-val   { font-size: 22px; font-weight: 800; color: var(--primary); font-family: monospace; }
+
+        /* ── Btn overrides ───────────────────────────────────── */
+        .btn-sm { width: auto; padding: 12px 24px; font-size: 14px; }
+        .btn-secondary { background: var(--secondary); box-shadow: 0 4px 12px rgba(0,188,212,0.3); }
+        .btn-secondary:hover { background: #009ab5; }
+        .btn-danger { background: var(--error); box-shadow: 0 4px 12px rgba(255,82,82,0.3); }
+        .btn-danger:hover { background: #e53935; }
+
+        .msg.success {
+            background: rgba(76,175,80,0.1);
+            color: var(--success);
+            border: 1px solid rgba(76,175,80,0.25);
+            display: block;
+        }
+
+        /* ── Page header ─────────────────────────────────────── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .page-header h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .page-header p { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+    </style>
+</head>
+<body style="display:flex; flex-direction:row;">
+
+    <!-- ── Login Overlay ────────────────────────────────────── -->
+    <div id="empLoginOverlay">
+        <div class="card" style="max-width:380px; width:100%;">
+            <div style="text-align:center; margin-bottom:24px;">
+                <div style="font-size:48px; margin-bottom:8px;">🏢</div>
+                <h2 id="empLoginTitle" style="margin-bottom:6px;">Admin Login</h2>
+                <p id="empLoginSubtitle" style="color:var(--text-dim); font-size:13px;">
+                    Enter your secure passcode to access the Employee Management Dashboard.
+                </p>
+            </div>
+
+            <div class="input-wrap">
+                <label>Admin Passcode</label>
+                <input type="password" id="empAdminPass" placeholder="Enter passcode"
+                    autocomplete="off" onkeydown="if(event.key==='Enter') checkEmpAdminPassword()">
+            </div>
+
+            <div id="empConfirmWrap" class="input-wrap" style="display:none;">
+                <label>Confirm Passcode</label>
+                <input type="password" id="empAdminPassConfirm" placeholder="Confirm passcode" autocomplete="off">
+            </div>
+
+            <div id="empAdminErr" class="msg error" style="display:none;"></div>
+            <button class="btn" id="empLoginBtn" onclick="checkEmpAdminPassword()">🔓 Unlock Dashboard</button>
+
+            <div style="text-align:center; margin-top:16px;">
+                <a href="#" onclick="resetEmpPasscode()" style="font-size:12px; color:var(--error); display:block; margin-bottom:8px;">
+                    🔑 Forgot Passcode? Reset it
+                </a>
+                <a href="index.html" style="font-size:12px; color:var(--text-dim);">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Dashboard Layout ─────────────────────────────────── -->
+    <div class="admin-layout" id="empDashboard" style="display:none; opacity:0; transition:opacity 0.4s;">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-icon">🏢</span>
+                <h2>EmpAdmin</h2>
+                <p>Employee Management</p>
+            </div>
+
+            <button class="nav-btn active" onclick="switchEmpTab('empTabDashboard', this)">
+                📊 Dashboard
+            </button>
+            <button class="nav-btn" onclick="switchEmpTab('empTabEmployees', this)">
+                👤 Employees
+            </button>
+            <button class="nav-btn" onclick="switchEmpTab('empTabSettings', this)">
+                ⚙️ Settings
+            </button>
+
+            <div style="flex:1;"></div>
+
+            <a href="admin.html" class="nav-btn" style="text-decoration:none; color:var(--primary);">
+                🗳️ Voting System
+            </a>
+
+            <button class="nav-btn" style="color:var(--secondary);" onclick="exportEmpCSV()">
+                📥 Export CSV
+            </button>
+            <button class="nav-btn" style="color:var(--error);" onclick="logoutEmpAdmin()">
+                🚪 Logout
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="admin-main">
+
+            <!-- ── Dashboard Tab ────────────────────────────── -->
+            <div id="empTabDashboard" class="emp-tab active stagger">
+                <div class="page-header">
+                    <div>
+                        <h2>📊 Dashboard Overview</h2>
+                        <p>Real-time summary of employee records</p>
+                    </div>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-val" id="statTotal">0</div>
+                        <div class="stat-label">Total Employees</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🆕</div>
+                        <div class="stat-val" id="statRecent" style="color:var(--secondary);">0</div>
+                        <div class="stat-label">Added This Week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🪪</div>
+                        <div class="stat-val" id="statFormat" style="font-size:22px; font-family:monospace;">—</div>
+                        <div class="stat-label">Current ID Format</div>
+                    </div>
+                </div>
+
+                <div class="settings-card" style="max-width:640px;">
+                    <h3>📥 Export Employee Report</h3>
+                    <p>Download a secure CSV file containing Employee IDs and Names only. No sensitive personal data is ever stored or exported.</p>
+                    <button class="btn btn-sm btn-secondary" onclick="exportEmpCSV()">Download CSV Report</button>
+                </div>
+
+                <div class="settings-card" style="max-width:640px; background: rgba(155,81,224,0.04); border:1px solid var(--primary-light);">
+                    <h3>🔐 Security Notice</h3>
+                    <p>This system stores only <strong>Employee ID</strong> and <strong>Employee Name</strong>. No phone numbers, addresses, or other sensitive personal information are collected or stored at any point.</p>
+                </div>
+            </div>
+
+            <!-- ── Employees Tab ────────────────────────────── -->
+            <div id="empTabEmployees" class="emp-tab">
+                <div class="page-header">
+                    <div>
+                        <h2>👤 Employee Records</h2>
+                        <p>Add, edit, search, and manage employee information</p>
+                    </div>
+                </div>
+
+                <!-- Add / Edit Form -->
+                <div class="emp-form-card">
+                    <h3 id="empFormTitle">➕ Add New Employee</h3>
+
+                    <!-- ID Format Hint -->
+                    <div class="id-format-hint">
+                        <span>🆔</span>
+                        <span class="hint-label">Required ID format:</span>
+                        <span id="empIdFormatHint" style="font-family:monospace; font-size:15px;">EMP001</span>
+                        <span class="hint-label" style="margin-left:4px;">(configure in ⚙️ Settings)</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-wrap" style="margin-bottom:0;">
+                            <label>Employee ID <span style="color:var(--error);">*</span></label>
+                            <input type="text" id="empIdInput" placeholder="e.g. EMP001"
+                                style="font-family:monospace; font-weight:700; letter-spacing:0.5px;"
+                                oninput="this.value=this.value.toUpperCase()">
+                        </div>
+                        <div class="input-wrap" style="margin-bottom:0;">
+                            <label>Employee Name <span style="color:var(--error);">*</span></label>
+                            <input type="text" id="empNameInput" placeholder="e.g. Arjun Sharma"
+                                onkeydown="if(event.key==='Enter') saveEmployeeForm()">
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-sm" id="empSaveBtn" onclick="saveEmployeeForm()">Add Employee</button>
+                            <button class="btn btn-sm" id="empCancelEditBtn"
+                                onclick="cancelEmpEdit()"
+                                style="display:none; background:var(--text-dim); box-shadow:none;">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div id="empFormErr" class="msg error" style="display:none; margin-top:16px; margin-bottom:0;"></div>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="search-wrap">
+                    <span style="font-size:18px;">🔍</span>
+                    <input type="text" id="empSearch" placeholder="Search by Employee ID or Employee Name…"
+                        oninput="filterEmployees()">
+                    <button onclick="clearSearch()">✕ Clear</button>
+                </div>
+
+                <!-- Employee Table -->
+                <div class="emp-table-wrap">
+                    <table class="emp-table">
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">#</th>
+                                <th>Employee ID</th>
+                                <th>Employee Name</th>
+                                <th>Date Added</th>
+                                <th style="text-align:right; padding-right:24px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="empTbody"></tbody>
+                    </table>
+                    <div id="empEmptyNotice" class="emp-empty-notice">
+                        No employees yet. Add one using the form above.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Settings Tab ─────────────────────────────── -->
+            <div id="empTabSettings" class="emp-tab">
+                <div class="page-header">
+                    <div>
+                        <h2>⚙️ Admin Settings</h2>
+                        <p>Configure Employee ID format and admin access</p>
+                    </div>
+                </div>
+
+                <!-- ID Format Config -->
+                <div class="settings-card">
+                    <h3>🆔 Employee ID Format Configuration</h3>
+                    <p>
+                        Define the <strong>prefix</strong> (letters only, e.g. <code>EMP</code>, <code>STAFF</code>) and the <strong>number of digits</strong> that follow (e.g. 3 digits → <code>001</code>). All new employee entries must match this format.
+                    </p>
+
+                    <div class="format-preview-box">
+                        <span class="preview-label">Current format preview:</span>
+                        <span class="preview-val" id="formatPreview">EMP001</span>
+                    </div>
+
+                    <div class="inline-row" style="margin-bottom:20px;">
+                        <div class="input-wrap">
+                            <label>ID Prefix (letters only)</label>
+                            <input type="text" id="settingsPrefix" placeholder="e.g. EMP"
+                                maxlength="8" oninput="this.value=this.value.toUpperCase(); updateFormatPreview()">
+                        </div>
+                        <div class="input-wrap" style="max-width:160px;">
+                            <label>Number of Digits</label>
+                            <input type="number" id="settingsDigits" min="1" max="6" placeholder="3"
+                                oninput="updateFormatPreview()">
+                        </div>
+                        <button class="btn btn-sm" onclick="saveIdFormatSettings()">💾 Save Format</button>
+                    </div>
+
+                    <div id="settingsMsg" class="msg" style="display:none;"></div>
+
+                    <div style="background:rgba(155,81,224,0.06); border-radius:10px; padding:14px 16px; font-size:13px; color:var(--text-dim);">
+                        💡 <strong>Examples:</strong> Prefix <code>EMP</code> + 3 digits → <code>EMP001</code> &nbsp;|&nbsp;
+                        Prefix <code>STAFF</code> + 4 digits → <code>STAFF0001</code> &nbsp;|&nbsp;
+                        Prefix <code>HR</code> + 2 digits → <code>HR01</code>
+                    </div>
+                </div>
+
+                <!-- Change Passcode -->
+                <div class="settings-card">
+                    <h3>🔒 Change Admin Passcode</h3>
+                    <p>Update your secure dashboard access code. You will be logged out after changing.</p>
+                    <div class="inline-row">
+                        <div class="input-wrap">
+                            <label>New Passcode</label>
+                            <input type="password" id="newEmpPasscode" placeholder="Min 4 characters">
+                        </div>
+                        <div class="input-wrap">
+                            <label>Confirm New Passcode</label>
+                            <input type="password" id="confirmEmpPasscode" placeholder="Re-enter passcode">
+                        </div>
+                        <button class="btn btn-sm" onclick="changeEmpPasscode()">Update Passcode</button>
+                    </div>
+                </div>
+
+                <!-- Danger Zone: Reset Records -->
+                <div class="settings-card danger-card">
+                    <h3>⚠️ Danger Zone: Clear All Records</h3>
+                    <p>Permanently deletes every employee record. This action CANNOT be undone. The ID format configuration and admin passcode are preserved.</p>
+                    <button class="btn btn-sm btn-danger" onclick="resetAllEmployees()">Delete All Employee Records</button>
+                </div>
+
+                <!-- Danger Zone: Reset Passcode -->
+                <div class="settings-card danger-card">
+                    <h3>🔑 Danger Zone: Reset Admin Passcode</h3>
+                    <p>Erases the saved admin passcode and logs you out. On next login you will be prompted to set a brand-new passcode.</p>
+                    <button class="btn btn-sm btn-danger" onclick="resetEmpPasscode()">Reset Passcode &amp; Logout</button>
+                </div>
+            </div>
+
+        </div><!-- /admin-main -->
+    </div><!-- /empDashboard -->
+
+    <script src="js/emp-db.js"></script>
+    <script src="js/emp-admin.js"></script>
+    <script>
+        // Update the ID format hint on the Employees tab whenever tab loads
+        document.addEventListener('DOMContentLoaded', () => {
+            function refreshFormatHint() {
+                const fmt  = getEmpIdFormat();
+                const hint = document.getElementById('empIdFormatHint');
+                const inp  = document.getElementById('empIdInput');
+                if (hint) hint.textContent = fmt.prefix + '0'.repeat(fmt.digits - 1) + '1';
+                if (inp)  inp.placeholder  = 'e.g. ' + fmt.example;
+            }
+
+            // Refresh hint on tab switch
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => setTimeout(refreshFormatHint, 50));
+            });
+
+            // Also expose so emp-admin.js can call it after saving
+            window.refreshFormatHint = refreshFormatHint;
+        });
+    </script>
+</body>
+</html>

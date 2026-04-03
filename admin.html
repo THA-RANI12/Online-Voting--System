@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaaS Voting Platform — Admin Dashboard</title>
+    <title>Admin Dashboard — Secure Online Voting System</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         .admin-layout {
@@ -120,7 +120,8 @@
             <div id="adminErr" class="msg error"></div>
             <button class="btn" id="loginBtn" onclick="checkAdminPassword()">Unlock Dashboard</button>
             
-            <div style="margin-top:20px; text-align:center;">
+            <div style="margin-top:16px; text-align:center;">
+                <a href="#" onclick="resetAdminPasscode()" style="font-size:12px; color:var(--error); display:block; margin-bottom:10px;">🔑 Forgot Passcode? Reset it</a>
                 <a href="index.html" style="font-size:12px; color:var(--text-dim);">← Back to Public Site</a>
             </div>
         </div>
@@ -134,6 +135,7 @@
             <div class="sidebar-brand">VotePro Admin</div>
             <button class="nav-btn active" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
             <button class="nav-btn" onclick="switchTab('candidates', this)">👥 Candidates</button>
+            <a href="emp-admin.html" class="nav-btn" style="text-decoration:none;">🏢 Employees</a>
             <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Settings</button>
             <div style="flex:1;"></div>
             <button class="nav-btn" style="color:var(--error);" onclick="logoutAdmin()">🚪 Logout</button>
@@ -231,10 +233,16 @@
                     </div>
                 </div>
 
-                <div class="card wide" style="max-width:100%; padding:24px; border:1px solid rgba(255,82,82,0.3); background:rgba(255,82,82,0.05);">
+                <div class="card wide" style="max-width:100%; padding:24px; border:1px solid rgba(255,82,82,0.3); background:rgba(255,82,82,0.05); margin-bottom:16px;">
                     <h3 style="color:var(--error); margin-bottom:16px;">⚠️ Danger Zone: Reset Election</h3>
                     <p style="color:var(--text-main); font-size:14px; margin-bottom:20px;">Resetting the election will clear ALL registered voters, used phones, and reset candidate vote tallies back to absolutely 0. This data cannot be recovered.</p>
                     <button class="btn" style="background:var(--error); width:auto;" onclick="resetElection()">Completely Reset Votes</button>
+                </div>
+
+                <div class="card wide" style="max-width:100%; padding:24px; border:1px solid rgba(255,82,82,0.3); background:rgba(255,82,82,0.05);">
+                    <h3 style="color:var(--error); margin-bottom:16px;">🔑 Danger Zone: Reset Admin Passcode</h3>
+                    <p style="color:var(--text-main); font-size:14px; margin-bottom:20px;">This will erase the saved admin passcode and log you out. On next login you will be prompted to create a brand-new passcode.</p>
+                    <button class="btn" style="background:var(--error); width:auto;" onclick="resetAdminPasscode()">Reset Passcode &amp; Logout</button>
                 </div>
             </div>
 
